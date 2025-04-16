@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>हमारा पर्यावरण - कक्षा 3 हिंदी गेम</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f0f8ff;
+            color: #333;
+            font-size: 18px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-page, .game-menu, .game-screen, .game-over {
+            display: none;
+            text-align: center;
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .active {
+            display: block;
+        }
+        
+        h1, h2, h3 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+        
+        input[type="text"] {
+            padding: 12px;
+            width: 100%;
+            max-width: 300px;
+            margin: 10px 0;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 10px 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .game-option {
+            background-color: #f9f9f9;
+            border: 2px solid #4CAF50;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px auto;
+            max-width: 500px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .game-option:hover {
+            background-color: #e9f5e9;
+            transform: translateY(-5px);
+        }
+        
+        .matching-game, .word-game, .quiz-game {
+            display: none;
+        }
+        
+        .game-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .card {
+            width: 150px;
+            height: 150px;
+            background-color: #81c784;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            perspective: 1000px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .card-front {
+            background-color: #4CAF50;
+            transform: rotateY(180deg);
+        }
+        
+        .card-back {
+            background-color: #81c784;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: 40px;
+        }
+        
+        .flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .matched {
+            background-color: #c8e6c9;
+            cursor: default;
+        }
+        
+        .word-container, .quiz-container {
+            margin: 20px 0;
+        }
+        
+        .word-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin: 20px auto;
+            max-width: 600px;
+        }
+        
+        .letter {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #e8f5e9;
+            border: 2px solid #81c784;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .letter:hover {
+            background-color: #c8e6c9;
+        }
+        
+        .letter.selected {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .word-item {
+            padding: 8px 15px;
+            background-color: #e8f5e9;
+            border-radius: 20px;
+            border: 1px solid #81c784;
+        }
+        
+        .word-found {
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: line-through;
+        }
+        
+        .quiz-question {
+            font-size: 20px;
+            margin: 20px 0;
+            background-color: #e8f5e9;
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .quiz-option {
+            padding: 10px;
+            background-color: #f1f8e9;
+            border: 2px solid #aed581;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .quiz-option:hover {
+            background-color: #dcedc8;
+        }
+        
+        .correct {
+            background-color: #a5d6a7;
+            border-color: #4CAF50;
+        }
+        
+        .incorrect {
+            background-color: #ffcdd2;
+            border-color: #e57373;
+        }
+        
+        .score-display {
+            font-size: 24px;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+        
+        .hint-button {
+            background-color: #ffb74d;
+            margin-top: 20px;
+        }
+        
+        .hint-text {
+            margin: 10px 0;
+            font-style: italic;
+            color: #5d4037;
+            display: none;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                width: 120px;
+                height: 120px;
+                font-size: 16px;
+            }
+            
+            .word-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .letter {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                font-size: 16px;
+            }
+            
+            .header {
+                padding: 10px;
+            }
+            
+            .card {
+                width: 90px;
+                height: 90px;
+                font-size: 14px;
+            }
+            
+            .word-grid {
+                grid-template-columns: repeat(5, 1fr);
+                gap: 5px;
+            }
+            
+            .letter {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            
+            button {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
+        
+        /* Animation for correct answers */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #4CAF50;
+            width: 0%;
+            transition: width 0.5s;
+        }
+        
+        .welcome-splash {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #e8f5e9;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            animation: fadeOut 1s ease-in-out 2s forwards;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; visibility: hidden; }
+        }
+        
+        .welcome-logo {
+            width: 200px;
+            height: 200px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        /* Particle effect for celebration */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #4CAF50;
+            opacity: 0;
+            border-radius: 50%;
+            animation: confetti-fall 3s ease-in-out forwards;
+        }
+        
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .character {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 100px;
+            height: 100px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="%234CAF50"/><circle cx="35" cy="40" r="5" fill="%23FFFFFF"/><circle cx="65" cy="40" r="5" fill="%23FFFFFF"/><path d="M35,65 Q50,80 65,65" stroke="%23FFFFFF" stroke-width="3" fill="none"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            animation: bounce 2s infinite;
+            z-index: 100;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Splash Screen -->
+    <div class="welcome-splash">
+        <div class="welcome-logo">
+            <span>सीखो</span>
+        </div>
+        <h1>हमारा पर्यावरण</h1>
+        <p>कक्षा 3 के लिए मज़ेदार खेल</p>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>हमारा पर्यावरण</h1>
+            <p>कक्षा 3 हिंदी गेम</p>
+        </div>
+        
+        <!-- Login Page -->
+        <div class="login-page active">
+            <h2>अपना परिचय दें</h2>
+            <div>
+                <input type="text" id="student-name" placeholder="अपना नाम लिखें" required>
+                <select id="student-class" style="padding: 12px; width: 100%; max-width: 300px; margin: 10px 0; border: 2px solid #4CAF50; border-radius: 8px; font-size: 18px;">
+                    <option value="">कक्षा चुनें</option>
+                    <option value="1">कक्षा 1</option>
+                    <option value="2">कक्षा 2</option>
+                    <option value="3">कक्षा 3</option>
+                    <option value="4">कक्षा 4</option>
+                    <option value="5">कक्षा 5</option>
+                </select>
+                <button id="start-button">शुरू करें</button>
+            </div>
+            <div class="character"></div>
+        </div>
+        
+        <!-- Game Menu -->
+        <div class="game-menu">
+            <h2>नमस्ते <span id="player-name"></span>!</h2>
+            <p>खेलने के लिए एक गेम चुनें:</p>
+            
+            <div class="game-option" data-game="matching">
+                <h3>मिलान खेल</h3>
+                <p>प्रकृति से क्या सीखें, उसका मिलान करें</p>
+            </div>
+            
+            <div class="game-option" data-game="word">
+                <h3>शब्द खोज</h3>
+                <p>कविता से शब्द ढूंढें</p>
+            </div>
+            
+            <div class="game-option" data-game="quiz">
+                <h3>पर्यावरण प्रश्नोत्तरी</h3>
+                <p>कविता पर आधारित प्रश्नों के उत्तर दें</p>
+            </div>
+            
+            <div class="character"></div>
+        </div>
+        
+        <!-- Matching Game -->
+        <div class="game-screen matching-game">
+            <h2>मिलान खेल</h2>
+            <p>प्रकृति से क्या सीखना है? सही जोड़े मिलाएँ।</p>
+            
+            <div class="game-board">
+                <!-- Cards will be added here by JavaScript -->
+            </div>
+            
+            <div class="score-display">अंक: <span id="matching-score">0</span></div>
+            
+            <button class="hint-button">संकेत दिखाएँ</button>
+            <div class="hint-text">कार्ड को क्लिक करके पलटें। समान अर्थ वाले दो कार्ड खोजें।</div>
+            
+            <button class="back-button">वापस जाएँ</button>
+        </div>
+        
+        <!-- Word Search Game -->
+        <div class="game-screen word-game">
+            <h2>शब्द खोज</h2>
+            <p>नीचे दिए गए अक्षरों में से कविता के शब्द खोजें।</p>
+            
+            <div class="word-container">
+                <div class="word-grid">
+                    <!-- Letters will be added here by JavaScript -->
+                </div>
+                
+                <div class="word-list">
+                    <!-- Words will be added here by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="score-display">अंक: <span id="word-score">0</span></div>
+            
+            <button class="hint-button">संकेत दिखाएँ</button>
+            <div class="hint-text">अक्षरों पर क्लिक करके शब्द बनाएँ। शब्द ऊपर से नीचे, बाएँ से दाएँ या तिरछे हो सकते हैं।</div>
+            
+            <button class="back-button">वापस जाएँ</button>
+        </div>
+        
+        <!-- Quiz Game -->
+        <div class="game-screen quiz-game">
+            <h2>पर्यावरण प्रश्नोत्तरी</h2>
+            <p>कविता से संबंधित प्रश्नों के उत्तर दें।</p>
+            
+            <div class="quiz-container">
+                <div class="progress-bar">
+                    <div class="progress" id="quiz-progress"></div>
+                </div>
+                
+                <div class="quiz-question" id="current-question">
+                    <!-- Question will be added here by JavaScript -->
+                </div>
+                
+                <div class="quiz-options" id="options-container">
+                    <!-- Options will be added here by JavaScript -->
+                </div>
+            </div>
+            
+            <div class="score-display">अंक: <span id="quiz-score">0</span></div>
+            
+            <button class="hint-button">संकेत दिखाएँ</button>
+            <div class="hint-text">सही उत्तर चुनने पर अंक मिलेंगे। कविता का अर्थ याद करें।</div>
+            
+            <button class="back-button">वापस जाएँ</button>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div class="game-over">
+            <h2>बधाई हो!</h2>
+            <p>आपने सभी स्तर पूरे कर लिए हैं।</p>
+            <div class="score-display">कुल अंक: <span id="total-score">0</span></div>
+            <button id="play-again">फिर से खेलें</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Data
+        const matchingPairs = [
+            { id: 1, front: "फूलों से", back: "हँसना सीखो" },
+            { id: 2, front: "भौंरों से", back: "गाना सीखो" },
+            { id: 3, front: "तरु की झुकी डालियों से", back: "शीश झुकाना सीखो" },
+            { id: 4, front: "हवा के झोंकों से", back: "कोमल भाव बहाना सीखो" },
+            { id: 5, front: "दूध तथा पानी से", back: "मिलना और मिलाना सीखो" },
+            { id: 6, front: "सूरज की किरणों से", back: "जगना और जगाना सीखो" },
+            { id: 7, front: "लता और पेड़ों से", back: "सबको गले लगाना सीखो" },
+            { id: 8, front: "दीपक से", back: "अंधेरा दूर करना सीखो" }
+        ];
+
+        const wordSearchWords = [
+            "फूल", "भौंरा", "सूरज", "दीपक", "पृथ्वी", "जलधारा", "धुएँ", "पेड़", "पानी", "सीखो", "किरण"
+        ];
+
+        const quizQuestions = [
+            {
+                question: "कविता में 'फूलों से' क्या सीखने की बात कही गई है?",
+                options: ["रोना", "हँसना", "सोना", "दौड़ना"],
+                answer: 1
+            },
+            {
+                question: "सूरज की किरणों से हमें क्या सीखना चाहिए?",
+                options: ["अंधेरा करना", "जगना और जगाना", "छुपना", "चुप रहना"],
+                answer: 1
+            },
+            {
+                question: "दीपक से हमें क्या सीखना चाहिए?",
+                options: ["जलना", "अंधेरा दूर करना", "प्रकाश देना", "तेल बचाना"],
+                answer: 1
+            },
+            {
+                question: "पृथ्वी से हमें क्या सीखने की बात कही गई है?",
+                options: ["धैर्य रखना", "प्राणी की सच्ची सेवा करना", "गर्मी सहना", "चुप रहना"],
+                answer: 1
+            },
+            {
+                question: "लता और पेड़ों से हमें क्या सीखना चाहिए?",
+                options: ["फल देना", "सबको गले लगाना", "छाया देना", "हरा रहना"],
+                answer: 1
+            },
+            {
+                question: "जलधारा से हमें क्या सीखना चाहिए?",
+                options: ["आगे बढ़ना", "बहना", "तैरना", "शांत रहना"],
+                answer: 0
+            },
+            {
+                question: "कविता का मुख्य संदेश क्या है?",
+                options: ["प्रकृति से सीखना", "पेड़ लगाना", "पानी बचाना", "खेलना"],
+                answer: 0
+            },
+            {
+                question: "तरु की झुकी डालियों से हमें क्या सीखना चाहिए?",
+                options: ["नमस्कार करना", "शीश झुकाना", "फल देना", "विनम्र रहना"],
+                answer: 1
+            },
+            {
+                question: "हवा के झोंकों से हम क्या सीखते हैं?",
+                options: ["तेज चलना", "गरम होना", "कोमल भाव बहाना", "ठंडा होना"],
+                answer: 2
+            },
+            {
+                question: "दूध तथा पानी से हमें क्या सीखना चाहिए?",
+                options: ["पीना", "मिलना और मिलाना", "बहना", "नहाना"],
+                answer: 1
+            }
+        ];
+
+        // Game Variables
+        let playerName = "";
+        let playerClass = "";
+        let currentGame = "";
+        let matchingScore = 0;
+        let wordScore = 0;
+        let quizScore = 0;
+        let totalScore = 0;
+        
+        let selectedCards = [];
+        let matchedPairs = 0;
+        
+        let currentWordSelection = [];
+        let foundWords = [];
+        
+        let currentQuestionIndex = 0;
+        
+        // DOM Elements
+        const loginPage = document.querySelector('.login-page');
+        const gameMenu = document.querySelector('.game-menu');
+        const gameScreens = document.querySelectorAll('.game-screen');
+        const gameOverScreen = document.querySelector('.game-over');
+        
+        const startButton = document.getElementById('start-button');
+        const gameOptions = document.querySelectorAll('.game-option');
+        const backButtons = document.querySelectorAll('.back-button');
+        const playAgainButton = document.getElementById('play-again');
+        const hintButtons = document.querySelectorAll('.hint-button');
+        
+        const playerNameDisplay = document.getElementById('player-name');
+        const matchingScoreDisplay = document.getElementById('matching-score');
+        const wordScoreDisplay = document.getElementById('word-score');
+        const quizScoreDisplay = document.getElementById('quiz-score');
+        const totalScoreDisplay = document.getElementById('total-score');
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start Game
+            startButton.addEventListener('click', startGame);
+            
+            // Game Selection
+            gameOptions.forEach(option => {
+                option.addEventListener('click', selectGame);
+            });
+            
+            // Back to Menu
+            backButtons.forEach(button => {
+                button.addEventListener('click', goBackToMenu);
+            });
+            
+            // Play Again
+            playAgainButton.addEventListener('click', resetAllGames);
+            
+            // Hint Buttons
+            hintButtons.forEach(button => {
+                button.addEventListener('click', showHint);
+            });
+            
+            // Initialize the matching game board
+            initializeMatchingGame();
+            
+            // Initialize the word search grid
+            initializeWordSearch();
+            
+            // Initialize the quiz
+            displayQuestion();
+        });
+        
+        // Game Functions
+        function startGame() {
+            const nameInput = document.getElementById('student-name');
+            const classInput = document.getElementById('student-class');
+            
+            if (nameInput.value.trim() === "") {
+                alert("कृपया अपना नाम दर्ज करें!");
+                return;
+            }
+            
+            if (classInput.value === "") {
+                alert("कृपया अपनी कक्षा चुनें!");
+                return;
+            }
+            
+            playerName = nameInput.value.trim();
+            playerClass = classInput.value;
+            
+            playerNameDisplay.textContent = playerName;
+            
+            loginPage.classList.remove('active');
+            gameMenu.classList.add('active');
+        }
+        
+        function selectGame(event) {
+            const selectedGame = event.currentTarget.dataset.game;
+            currentGame = selectedGame;
+            
+            gameMenu.classList.remove('active');
+            document.querySelector(`.${selectedGame}-game`).classList.add('active');
+            
+            // Reset the current game
+            if (selectedGame === 'matching') {
+                resetMatchingGame();
+            } else if (selectedGame === 'word') {
+                resetWordSearch();
+            } else if (selectedGame === 'quiz') {
+                resetQuiz();
+            }
+        }
+        
+        function goBackToMenu() {
+            // Hide all game screens
+            gameScreens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show the menu
+            gameMenu.classList.add('active');
+        }
+        
+        function showHint(event) {
+            const hintText = event.currentTarget.nextElementSibling;
+            hintText.style.display = hintText.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function updateTotalScore() {
+            totalScore = matchingScore + wordScore + quizScore;
+            totalScoreDisplay.textContent = totalScore;
+        }
+        
+        function checkGameCompletion() {
+            if (matchedPairs === matchingPairs.length / 2 && foundWords.length === wordSearchWords.length && currentQuestionIndex >= quizQuestions.length) {
+                // All games completed
+                gameScreens.forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                updateTotalScore();
+                createConfetti();
+                gameOverScreen.classList.add('active');
+            }
+        }
+        
+        function resetAllGames() {
+            resetMatchingGame();
+            resetWordSearch();
+            resetQuiz();
+            
+            totalScore = 0;
+            updateTotalScore();
+            
+            gameOverScreen.classList.remove('active');
+            gameMenu.classList.add('active');
+        }
+        
+        // Matching Game Functions
+        function initializeMatchingGame() {
+            const gameBoard = document.querySelector('.matching-game .game-board');
+            gameBoard.innerHTML = '';
+            
+            // Create shuffled array of cards
+            let cards = [];
+            matchingPairs.forEach(pair => {
+                cards.push({ id: `a${pair.id}`, content: pair.front, pairId: pair.id });
+                cards.push({ id: `b${pair.id}`, content: pair.back, pairId: pair.id });
+            });
+            
+            // Shuffle cards
+            cards = shuffleArray(cards);
+            
+            // Create card elements
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = 'card';
+                cardElement.dataset.id = card.id;
+                cardElement.dataset.pairId = card.pairId;
+                
+                cardElement.innerHTML = `
+                    <div class="card-front">${card.content}</div>
+                    <div class="card-back"></div>
+                `;
+                
+                cardElement.addEventListener('click', flipCard);
+                gameBoard.appendChild(cardElement);
+            });
+        }
+        
+        function flipCard() {
+            // If already matched or already selected, do nothing
+            if (this.classList.contains('matched') || selectedCards.includes(this) || selectedCards.length >= 2) {
+                return;
+            }
+            
+            // Flip the card
+            this.classList.add('flipped');
+            selectedCards.push(this);
+            
+            // If we have 2 cards flipped, check for match
+            if (selectedCards.length === 2) {
+                setTimeout(checkForMatch, 1000);
+            }
+        }
+        
+        function checkForMatch() {
+            const card1 = selectedCards[0];
+            const card2 = selectedCards[1];
+            
+            if (card1.dataset.pairId === card2.dataset.pairId) {
+                // Match found
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                
+                matchedPairs++;
+                matchingScore += 10;
+                matchingScoreDisplay.textContent = matchingScore;
+                
+                // Celebrate
+                card1.classList.add('celebrate');
+                card2.classList.add('celebrate');
+                
+                setTimeout(() => {
+                    card1.classList.remove('celebrate');
+                    card2.classList.remove('celebrate');
+                }, 500);
+                
+                // Check if game is complete
+                if (matchedPairs === matchingPairs.length / 2) {
+                    matchingScore += 20; // Bonus for completing
+                    matchingScoreDisplay.textContent = matchingScore;
+                    setTimeout(checkGameCompletion, 1000);
+                }
+            } else {
+                // No match, flip back
+                card1.classList.remove('flipped');
+                card2.classList.remove('flipped');
+            }
+            
+            // Reset selection
+            selectedCards = [];
+        }
+        
+        function resetMatchingGame() {
+            matchedPairs = 0;
+            matchingScore = 0;
+            selectedCards = [];
+            
+            matchingScoreDisplay.textContent = matchingScore;
+            
+            const cards = document.querySelectorAll('.matching-game .card');
+            cards.forEach(card => {
+                card.classList.remove('flipped', 'matched');
+            });
+        }
+        
+        // Word Search Functions
+        function initializeWordSearch() {
+            const grid = document.querySelector('.word-game .word-grid');
+            const wordList = document.querySelector('.word-game .word-list');
+            
+            // Clear previous grids
+            grid.innerHTML = '';
+            wordList.innerHTML = '';
+            
+            // Generate random letters for grid
+            const gridSize = { rows: 8, cols: 8 };
+            const gridLetters = [];
+            
+            // Fill with random letters first
+            for (let i = 0; i < gridSize.rows; i++) {
+                const row = [];
+                for (let j = 0; j < gridSize.cols; j++) {
+                    row.push(getRandomHindiLetter());
+                }
+                gridLetters.push(row);
+            }
+            
+            // Place words in the grid
+            const directions = [
+                [0, 1],  // Right
+                [1, 0],  // Down
+                [1, 1]   // Diagonal
+            ];
+            
+            wordSearchWords.forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                
+                while (!placed && attempts < 50) {
+                    attempts++;
+                    
+                    // Choose random direction
+                    const dirIndex = Math.floor(Math.random() * directions.length);
+                    const dir = directions[dirIndex];
+                    
+                    // Choose random starting position
+                    const startRow = Math.floor(Math.random() * (gridSize.rows - word.length * dir[0]));
+                    const startCol = Math.floor(Math.random() * (gridSize.cols - word.length * dir[1]));
+                    
+                    // Check if we can place the word
+                    let canPlace = true;
+                    for (let i = 0; i < word.length; i++) {
+                        const row = startRow + i * dir[0];
+                        const col = startCol + i * dir[1];
+                        
+                        if (gridLetters[row][col] !== word[i] && gridLetters[row][col] !== getRandomHindiLetter()) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+                    
+                    // Place the word
+                    if (canPlace) {
+                        for (let i = 0; i < word.length; i++) {
+                            const row = startRow + i * dir[0];
+                            const col = startCol + i * dir[1];
+                            gridLetters[row][col] = word[i];
+                        }
+                        placed = true;
+                    }
+                }
+            });
+            
+            // Create the grid in the UI
+            for (let i = 0; i < gridSize.rows; i++) {
+                for (let j = 0; j < gridSize.cols; j++) {
+                    const letter = document.createElement('div');
+                    letter.className = 'letter';
+                    letter.textContent = gridLetters[i][j];
+                    letter.dataset.row = i;
+                    letter.dataset.col = j;
+                    letter.addEventListener('click', selectLetter);
+                    grid.appendChild(letter);
+                }
+            }
+            
+            // Create the word list
+            wordSearchWords.forEach(word => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.textContent = word;
+                wordItem.dataset.word = word;
+                wordList.appendChild(wordItem);
+            });
+        }
+        
+        function selectLetter() {
+            // Toggle selection
+            this.classList.toggle('selected');
+            
+            // If selected, add to current selection
+            if (this.classList.contains('selected')) {
+                currentWordSelection.push(this);
+                
+                // Check if we've formed a valid word
+                const selectedWord = currentWordSelection.map(el => el.textContent).join('');
+                
+                if (wordSearchWords.includes(selectedWord) && !foundWords.includes(selectedWord)) {
+                    // Word found!
+                    foundWords.push(selectedWord);
+                    
+                    // Mark word as found in the list
+                    const wordItems = document.querySelectorAll('.word-item');
+                    wordItems.forEach(item => {
+                        if (item.dataset.word === selectedWord) {
+                            item.classList.add('word-found');
+                        }
+                    });
+                    
+                    // Update score
+                    wordScore += selectedWord.length * 2;
+                    wordScoreDisplay.textContent = wordScore;
+                    
+                    // Clear selection
+                    currentWordSelection.forEach(el => {
+                        el.classList.remove('selected');
+                        el.classList.add('celebrate');
+                        setTimeout(() => el.classList.remove('celebrate'), 500);
+                    });
+                    currentWordSelection = [];
+                    
+                    // Check if all words found
+                    if (foundWords.length === wordSearchWords.length) {
+                        wordScore += 30; // Bonus for finding all words
+                        wordScoreDisplay.textContent = wordScore;
+                        setTimeout(checkGameCompletion, 1000);
+                    }
+                }
+            } else {
+                // If deselected, remove from current selection
+                currentWordSelection = currentWordSelection.filter(el => el !== this);
+            }
+        }
+        
+        function resetWordSearch() {
+            currentWordSelection = [];
+            foundWords = [];
+            wordScore = 0;
+            
+            wordScoreDisplay.textContent = wordScore;
+            
+            // Reinitialize the grid
+            initializeWordSearch();
+        }
+        
+        // Quiz Game Functions
+        function displayQuestion() {
+            const questionContainer = document.getElementById('current-question');
+            const optionsContainer = document.getElementById('options-container');
+            const progressBar = document.getElementById('quiz-progress');
+            
+            // If no more questions, end the game
+            if (currentQuestionIndex >= quizQuestions.length) {
+                // Quiz completed
+                setTimeout(checkGameCompletion, 1000);
+                return;
+            }
+            
+            // Update progress bar
+            const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            
+            // Display current question
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            questionContainer.textContent = currentQuestion.question;
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+            
+            // Add options
+            currentQuestion.options.forEach((option, index) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'quiz-option';
+                optionElement.textContent = option;
+                optionElement.dataset.index = index;
+                optionElement.addEventListener('click', checkAnswer);
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+        
+        function checkAnswer() {
+            const selectedIndex = parseInt(this.dataset.index);
+            const currentQuestion = quizQuestions[currentQuestionIndex];
+            
+            // Disable all options
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => {
+                option.removeEventListener('click', checkAnswer);
+            });
+            
+            // Check if answer is correct
+            if (selectedIndex === currentQuestion.answer) {
+                // Correct answer
+                this.classList.add('correct');
+                this.classList.add('celebrate');
+                
+                quizScore += 10;
+                quizScoreDisplay.textContent = quizScore;
+            } else {
+                // Wrong answer
+                this.classList.add('incorrect');
+                
+                // Highlight correct answer
+                options[currentQuestion.answer].classList.add('correct');
+            }
+            
+            // Move to next question after delay
+            setTimeout(() => {
+                currentQuestionIndex++;
+                displayQuestion();
+            }, 1500);
+        }
+        
+        function resetQuiz() {
+            currentQuestionIndex = 0;
+            quizScore = 0;
+            
+            quizScoreDisplay.textContent = quizScore;
+            
+            // Display first question
+            displayQuestion();
+        }
+        
+        // Utility Functions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+        
+        function getRandomHindiLetter() {
+            const hindiLetters = "अआइईउऊएऐओऔकखगघचछजझटठडढणतथदधनपफबभमयरलवशषसह";
+            return hindiLetters[Math.floor(Math.random() * hindiLetters.length)];
+        }
+        
+        function createConfetti() {
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = getRandomColor();
+                confetti.style.animationDelay = `${Math.random() * 3}s`;
+                document.body.appendChild(confetti);
+                
+                // Remove after animation completes
+                setTimeout(() => {
+                    confetti.remove();
+                }, 3000);
+            }
+        }
+        
+        function getRandomColor() {
+            const colors = ['#4CAF50', '#FFC107', '#2196F3', '#E91E63', '#9C27B0', '#FF5722'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
+</body>
+</html>
