@@ -170,6 +170,7 @@
             margin: 20px 0;
         }
         
+        /* Updated word grid styles */
         .word-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
@@ -194,11 +195,13 @@
         
         .letter:hover {
             background-color: #c8e6c9;
+            transform: scale(1.05);
         }
         
         .letter.selected {
             background-color: #4CAF50;
             color: white;
+            transform: scale(1.05);
         }
         
         .word-list {
@@ -436,6 +439,12 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
+        
+        /* Add new button for regenerating word search */
+        .regenerate-button {
+            background-color: #388e3c;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -512,23 +521,24 @@
             <button class="back-button">वापस जाएँ</button>
         </div>
         
-        <!-- Word Search Game -->
+        <!-- Word Search Game - Updated HTML structure -->
         <div class="game-screen word-game">
             <h2>शब्द खोज</h2>
             <p>नीचे दिए गए अक्षरों में से कविता के शब्द खोजें।</p>
             
             <div class="word-container">
-                <div class="word-grid">
+                <div class="word-grid" id="word-search-grid">
                     <!-- Letters will be added here by JavaScript -->
                 </div>
                 
-                <div class="word-list">
+                <div class="word-list" id="word-list">
                     <!-- Words will be added here by JavaScript -->
                 </div>
             </div>
             
             <div class="score-display">अंक: <span id="word-score">0</span></div>
             
+            <button class="regenerate-button" id="regenerate-word-search">नया शब्द खोज बनाएँ</button>
             <button class="hint-button">संकेत दिखाएँ</button>
             <div class="hint-text">अक्षरों पर क्लिक करके शब्द बनाएँ। शब्द ऊपर से नीचे, बाएँ से दाएँ या तिरछे हो सकते हैं।</div>
             
@@ -584,6 +594,7 @@
             { id: 8, front: "दीपक से", back: "अंधेरा दूर करना सीखो" }
         ];
 
+        // Updated word search words
         const wordSearchWords = [
             "फूल", "भौंरा", "सूरज", "दीपक", "पृथ्वी", "जलधारा", "धुएँ", "पेड़", "पानी", "सीखो", "किरण"
         ];
@@ -653,8 +664,11 @@
         let selectedCards = [];
         let matchedPairs = 0;
         
+        // Updated word search variables
         let currentWordSelection = [];
         let foundWords = [];
+        let wordSearchGrid = [];
+        let placedWords = [];
         
         let currentQuestionIndex = 0;
         
@@ -669,6 +683,7 @@
         const backButtons = document.querySelectorAll('.back-button');
         const playAgainButton = document.getElementById('play-again');
         const hintButtons = document.querySelectorAll('.hint-button');
+        const regenerateWordSearchButton = document.getElementById('regenerate-word-search');
         
         const playerNameDisplay = document.getElementById('player-name');
         const matchingScoreDisplay = document.getElementById('matching-score');
@@ -704,11 +719,16 @@
                 button.addEventListener('click', showHint);
             });
             
+            // Regenerate Word Search
+            if (regenerateWordSearchButton) {
+                regenerateWordSearchButton.addEventListener('click', generateWordSearch);
+            }
+            
             // Initialize the matching game board
             initializeMatchingGame();
             
-            // Initialize the word search grid
-            initializeWordSearch();
+            // Initialize the word search grid (with new logic)
+            generateWordSearch();
             
             // Initialize the quiz
             displayQuestion();
@@ -919,41 +939,41 @@
             });
         }
         
-        // Word Search Functions
-        function initializeWordSearch() {
-            const grid = document.querySelector('.word-game .word-grid');
-            const wordList = document.querySelector('.word-game .word-list');
+        // Word Search Functions - NEW IMPLEMENTATION
+        function generateWordSearch() {
+            const gridSize = 8;
+            wordSearchGrid = [];
+            placedWords = [];
+            currentWordSelection = [];
+            foundWords = [];
+            wordScore = 0;
             
-            if (!grid || !wordList) {
-                console.error("Word search grid or list not found");
-                return;
+            if (wordScoreDisplay) {
+                wordScoreDisplay.textContent = wordScore;
             }
             
-            // Clear previous grids
-            grid.innerHTML = '';
-            wordList.innerHTML = '';
-            
-            // Generate random letters for grid
-            const gridSize = { rows: 8, cols: 8 };
-            const gridLetters = [];
-            
-            // Fill with random letters first
-            for (let i = 0; i < gridSize.rows; i++) {
+            // Initialize empty grid
+            for (let i = 0; i < gridSize; i++) {
                 const row = [];
-                for (let j = 0; j < gridSize.cols; j++) {
-                    row.push(getRandomHindiLetter());
+                for (let j = 0; j < gridSize; j++) {
+                    row.push('');
                 }
-                gridLetters.push(row);
+                wordSearchGrid.push(row);
             }
             
-            // Place words in the grid
+            // Define directions: [row change, col change]
             const directions = [
                 [0, 1],  // Right
                 [1, 0],  // Down
-                [1, 1]   // Diagonal
+                [1, 1],  // Diagonal down-right
+                [1, -1]  // Diagonal down-left
             ];
             
-            wordSearchWords.forEach(word => {
+            // Shuffle words to randomize placement
+            const shuffledWords = [...wordSearchWords].sort(() => Math.random() - 0.5);
+            
+            // Place words in grid
+            shuffledWords.forEach(word => {
                 let placed = false;
                 let attempts = 0;
                 
@@ -961,106 +981,191 @@
                     attempts++;
                     
                     // Choose random direction
-                    const dirIndex = Math.floor(Math.random() * directions.length);
-                    const dir = directions[dirIndex];
+                    const direction = directions[Math.floor(Math.random() * directions.length)];
                     
                     // Choose random starting position
-                    const startRow = Math.floor(Math.random() * (gridSize.rows - word.length * dir[0]));
-                    const startCol = Math.floor(Math.random() * (gridSize.cols - word.length * dir[1]));
+                    let row = Math.floor(Math.random() * gridSize);
+                    let col = Math.floor(Math.random() * gridSize);
                     
-                    // Check if we can place the word
+                    // Adjust start position to fit word based on direction
+                    if (direction[0] !== 0) {
+                        row = Math.min(row, gridSize - word.length);
+                    }
+                    if (direction[0] === 1 && direction[1] === -1) {
+                        col = Math.max(word.length - 1, col);
+                    }
+                    if (direction[1] !== 0 && direction[1] !== -1) {
+                        col = Math.min(col, gridSize - word.length);
+                    }
+                    
+                    // Check if word can be placed
                     let canPlace = true;
+                    let positions = [];
+                    
                     for (let i = 0; i < word.length; i++) {
-                        const row = startRow + i * dir[0];
-                        const col = startCol + i * dir[1];
+                        const newRow = row + i * direction[0];
+                        const newCol = col + i * direction[1];
                         
-                        if (gridLetters[row][col] !== word[i] && gridLetters[row][col] !== getRandomHindiLetter()) {
+                        // Check boundaries
+                        if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
                             canPlace = false;
                             break;
                         }
+                        
+                        // Check if cell is empty or matches the letter
+                        if (wordSearchGrid[newRow][newCol] !== '' && 
+                            wordSearchGrid[newRow][newCol] !== word[i]) {
+                            canPlace = false;
+                            break;
+                        }
+                        
+                        positions.push([newRow, newCol]);
                     }
                     
-                    // Place the word
+                    // Place word if possible
                     if (canPlace) {
                         for (let i = 0; i < word.length; i++) {
-                            const row = startRow + i * dir[0];
-                            const col = startCol + i * dir[1];
-                            gridLetters[row][col] = word[i];
+                            const [r, c] = positions[i];
+                            wordSearchGrid[r][c] = word[i];
                         }
+                        
+                        placedWords.push({
+                            word,
+                            positions
+                        });
+                        
                         placed = true;
                     }
                 }
+                
+                if (!placed) {
+                    console.warn(`Could not place word: ${word}`);
+                }
             });
             
-            // Create the grid in the UI
-            for (let i = 0; i < gridSize.rows; i++) {
-                for (let j = 0; j < gridSize.cols; j++) {
-                    const letter = document.createElement('div');
-                    letter.className = 'letter';
-                    letter.textContent = gridLetters[i][j];
-                    letter.dataset.row = i;
-                    letter.dataset.col = j;
-                    letter.addEventListener('click', selectLetter);
-                    grid.appendChild(letter);
+            // Fill empty cells with random Hindi letters
+            const hindiLetters = "अआइईउऊएऐओऔकखगघचछजझटठडढणतथदधनपफबभमयरलवशषसह";
+            
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    if (wordSearchGrid[i][j] === '') {
+                        wordSearchGrid[i][j] = hindiLetters[Math.floor(Math.random() * hindiLetters.length)];
+                    }
                 }
             }
             
-            // Create the word list
+            // Update UI
+            renderWordSearch();
+        }
+        
+        function renderWordSearch() {
+            const gridContainer = document.getElementById('word-search-grid');
+            const wordListContainer = document.getElementById('word-list');
+            
+            if (!gridContainer || !wordListContainer) {
+                console.error("Word search containers not found");
+                return;
+            }
+            
+            // Clear containers
+            gridContainer.innerHTML = '';
+            wordListContainer.innerHTML = '';
+            
+            // Render grid
+            for (let i = 0; i < wordSearchGrid.length; i++) {
+                for (let j = 0; j < wordSearchGrid[i].length; j++) {
+                    const letter = document.createElement('div');
+                    letter.className = 'letter';
+                    letter.textContent = wordSearchGrid[i][j];
+                    letter.dataset.row = i;
+                    letter.dataset.col = j;
+                    letter.addEventListener('click', handleLetterClick);
+                    gridContainer.appendChild(letter);
+                }
+            }
+            
+            // Render word list
             wordSearchWords.forEach(word => {
-                const wordItem = document.createElement('div');
-                wordItem.className = 'word-item';
-                wordItem.textContent = word;
-                wordItem.dataset.word = word;
-                wordList.appendChild(wordItem);
+                const wordElement = document.createElement('div');
+                wordElement.className = foundWords.includes(word) ? 'word-item word-found' : 'word-item';
+                wordElement.textContent = word;
+                wordElement.dataset.word = word;
+                wordListContainer.appendChild(wordElement);
             });
         }
         
-        function selectLetter() {
-            // Toggle selection
+        function handleLetterClick() {
+            // Toggle selection state
             this.classList.toggle('selected');
             
-            // If selected, add to current selection
+            // Get cell coordinates
+            const row = parseInt(this.dataset.row);
+            const col = parseInt(this.dataset.col);
+            
+            // If selected, add to selection
             if (this.classList.contains('selected')) {
-                currentWordSelection.push(this);
-                
-                // Check if we've formed a valid word
-                const selectedWord = currentWordSelection.map(el => el.textContent).join('');
-                
-                if (wordSearchWords.includes(selectedWord) && !foundWords.includes(selectedWord)) {
-                    // Word found!
-                    foundWords.push(selectedWord);
-                    
-                    // Mark word as found in the list
-                    const wordItems = document.querySelectorAll('.word-item');
-                    wordItems.forEach(item => {
-                        if (item.dataset.word === selectedWord) {
-                            item.classList.add('word-found');
-                        }
-                    });
-                    
-                    // Update score
-                    wordScore += selectedWord.length * 2;
-                    wordScoreDisplay.textContent = wordScore;
-                    
-                    // Clear selection
-                    currentWordSelection.forEach(el => {
-                        el.classList.remove('selected');
-                        el.classList.add('celebrate');
-                        setTimeout(() => el.classList.remove('celebrate'), 500);
-                    });
-                    currentWordSelection = [];
-                    
-                    // Check if all words found
-                    if (foundWords.length === wordSearchWords.length) {
-                        wordScore += 30; // Bonus for finding all words
-                        wordScoreDisplay.textContent = wordScore;
-                        setTimeout(checkGameCompletion, 1000);
-                    }
-                }
+                currentWordSelection.push({
+                    element: this,
+                    row: row,
+                    col: col,
+                    letter: wordSearchGrid[row][col]
+                });
             } else {
-                // If deselected, remove from current selection
-                currentWordSelection = currentWordSelection.filter(el => el !== this);
+                // If deselected, remove from selection
+                currentWordSelection = currentWordSelection.filter(
+                    cell => cell.element !== this
+                );
             }
+            
+            // Check if selected letters form a word
+            checkSelectedWord();
+        }
+        
+        function checkSelectedWord() {
+            if (currentWordSelection.length === 0) return;
+            
+            // Get the word from selected letters
+            const selectedWord = currentWordSelection.map(cell => cell.letter).join('');
+            
+            // Check if it's in our word list and not already found
+            if (wordSearchWords.includes(selectedWord) && !foundWords.includes(selectedWord)) {
+                // Word found!
+                foundWords.push(selectedWord);
+                
+                // Update UI
+                const wordItems = document.querySelectorAll('.word-item');
+                wordItems.forEach(item => {
+                    if (item.dataset.word === selectedWord) {
+                        item.classList.add('word-found');
+                    }
+                });
+                
+                // Add celebration effect
+                currentWordSelection.forEach(cell => {
+                    cell.element.classList.add('celebrate');
+                    setTimeout(() => {
+                        cell.element.classList.remove('celebrate');
+                    }, 500);
+                });
+                
+                // Award points - longer words worth more
+                wordScore += selectedWord.length * 2;
+                wordScoreDisplay.textContent = wordScore;
+                
+                // Check if all words found
+                if (foundWords.length === wordSearchWords.length) {
+                    // Bonus for finding all words
+                    wordScore += 30;
+                    wordScoreDisplay.textContent = wordScore;
+                    setTimeout(checkGameCompletion, 1000);
+                }
+            }
+            
+            // Clear selection
+            currentWordSelection.forEach(cell => {
+                cell.element.classList.remove('selected');
+            });
+            currentWordSelection = [];
         }
         
         function resetWordSearch() {
@@ -1068,10 +1173,12 @@
             foundWords = [];
             wordScore = 0;
             
-            wordScoreDisplay.textContent = wordScore;
+            if (wordScoreDisplay) {
+                wordScoreDisplay.textContent = wordScore;
+            }
             
-            // Reinitialize the grid
-            initializeWordSearch();
+            // Generate new word search
+            generateWordSearch();
         }
         
         // Quiz Game Functions
