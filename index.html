@@ -101,7 +101,7 @@
             transform: translateY(-5px);
         }
         
-        .matching-game, .word-game, .quiz-game {
+        .matching-game, .quiz-game {
             display: none;
         }
         
@@ -166,63 +166,8 @@
             cursor: default;
         }
         
-        .word-container, .quiz-container {
+        .quiz-container {
             margin: 20px 0;
-        }
-        
-        /* Updated word grid styles */
-        .word-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 10px;
-            margin: 20px auto;
-            max-width: 600px;
-        }
-        
-        .letter {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #e8f5e9;
-            border: 2px solid #81c784;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-        
-        .letter:hover {
-            background-color: #c8e6c9;
-            transform: scale(1.05);
-        }
-        
-        .letter.selected {
-            background-color: #4CAF50;
-            color: white;
-            transform: scale(1.05);
-        }
-        
-        .word-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0;
-        }
-        
-        .word-item {
-            padding: 8px 15px;
-            background-color: #e8f5e9;
-            border-radius: 20px;
-            border: 1px solid #81c784;
-        }
-        
-        .word-found {
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: line-through;
         }
         
         .quiz-question {
@@ -295,16 +240,6 @@
                 height: 120px;
                 font-size: 16px;
             }
-            
-            .word-grid {
-                grid-template-columns: repeat(6, 1fr);
-            }
-            
-            .letter {
-                width: 35px;
-                height: 35px;
-                font-size: 16px;
-            }
         }
         
         @media (max-width: 480px) {
@@ -319,17 +254,6 @@
             .card {
                 width: 90px;
                 height: 90px;
-                font-size: 14px;
-            }
-            
-            .word-grid {
-                grid-template-columns: repeat(5, 1fr);
-                gap: 5px;
-            }
-            
-            .letter {
-                width: 30px;
-                height: 30px;
                 font-size: 14px;
             }
             
@@ -439,12 +363,6 @@
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-        
-        /* Add new button for regenerating word search */
-        .regenerate-button {
-            background-color: #388e3c;
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
@@ -491,11 +409,6 @@
                 <p>प्रकृति से क्या सीखें, उसका मिलान करें</p>
             </div>
             
-            <div class="game-option" data-game="word">
-                <h3>शब्द खोज</h3>
-                <p>कविता से शब्द ढूंढें</p>
-            </div>
-            
             <div class="game-option" data-game="quiz">
                 <h3>पर्यावरण प्रश्नोत्तरी</h3>
                 <p>कविता पर आधारित प्रश्नों के उत्तर दें</p>
@@ -517,30 +430,6 @@
             
             <button class="hint-button">संकेत दिखाएँ</button>
             <div class="hint-text">कार्ड को क्लिक करके पलटें। समान अर्थ वाले दो कार्ड खोजें।</div>
-            
-            <button class="back-button">वापस जाएँ</button>
-        </div>
-        
-        <!-- Word Search Game - Updated HTML structure -->
-        <div class="game-screen word-game">
-            <h2>शब्द खोज</h2>
-            <p>नीचे दिए गए अक्षरों में से कविता के शब्द खोजें।</p>
-            
-            <div class="word-container">
-                <div class="word-grid" id="word-search-grid">
-                    <!-- Letters will be added here by JavaScript -->
-                </div>
-                
-                <div class="word-list" id="word-list">
-                    <!-- Words will be added here by JavaScript -->
-                </div>
-            </div>
-            
-            <div class="score-display">अंक: <span id="word-score">0</span></div>
-            
-            <button class="regenerate-button" id="regenerate-word-search">नया शब्द खोज बनाएँ</button>
-            <button class="hint-button">संकेत दिखाएँ</button>
-            <div class="hint-text">अक्षरों पर क्लिक करके शब्द बनाएँ। शब्द ऊपर से नीचे, बाएँ से दाएँ या तिरछे हो सकते हैं।</div>
             
             <button class="back-button">वापस जाएँ</button>
         </div>
@@ -592,11 +481,6 @@
             { id: 6, front: "सूरज की किरणों से", back: "जगना और जगाना सीखो" },
             { id: 7, front: "लता और पेड़ों से", back: "सबको गले लगाना सीखो" },
             { id: 8, front: "दीपक से", back: "अंधेरा दूर करना सीखो" }
-        ];
-
-        // Updated word search words
-        const wordSearchWords = [
-            "फूल", "भौंरा", "सूरज", "दीपक", "पृथ्वी", "जलधारा", "धुएँ", "पेड़", "पानी", "सीखो", "किरण"
         ];
 
         const quizQuestions = [
@@ -657,18 +541,11 @@
         let playerClass = "";
         let currentGame = "";
         let matchingScore = 0;
-        let wordScore = 0;
         let quizScore = 0;
         let totalScore = 0;
         
         let selectedCards = [];
         let matchedPairs = 0;
-        
-        // Updated word search variables
-        let currentWordSelection = [];
-        let foundWords = [];
-        let wordSearchGrid = [];
-        let placedWords = [];
         
         let currentQuestionIndex = 0;
         
@@ -683,11 +560,9 @@
         const backButtons = document.querySelectorAll('.back-button');
         const playAgainButton = document.getElementById('play-again');
         const hintButtons = document.querySelectorAll('.hint-button');
-        const regenerateWordSearchButton = document.getElementById('regenerate-word-search');
         
         const playerNameDisplay = document.getElementById('player-name');
         const matchingScoreDisplay = document.getElementById('matching-score');
-        const wordScoreDisplay = document.getElementById('word-score');
         const quizScoreDisplay = document.getElementById('quiz-score');
         const totalScoreDisplay = document.getElementById('total-score');
         
@@ -719,16 +594,8 @@
                 button.addEventListener('click', showHint);
             });
             
-            // Regenerate Word Search
-            if (regenerateWordSearchButton) {
-                regenerateWordSearchButton.addEventListener('click', generateWordSearch);
-            }
-            
             // Initialize the matching game board
             initializeMatchingGame();
-            
-            // Initialize the word search grid (with new logic)
-            generateWordSearch();
             
             // Initialize the quiz
             displayQuestion();
@@ -783,8 +650,6 @@
             // Reset the current game
             if (selectedGame === 'matching') {
                 resetMatchingGame();
-            } else if (selectedGame === 'word') {
-                resetWordSearch();
             } else if (selectedGame === 'quiz') {
                 resetQuiz();
             }
@@ -806,12 +671,12 @@
         }
         
         function updateTotalScore() {
-            totalScore = matchingScore + wordScore + quizScore;
+            totalScore = matchingScore + quizScore;
             totalScoreDisplay.textContent = totalScore;
         }
         
         function checkGameCompletion() {
-            if (matchedPairs === matchingPairs.length / 2 && foundWords.length === wordSearchWords.length && currentQuestionIndex >= quizQuestions.length) {
+            if (matchedPairs === matchingPairs.length / 2 && currentQuestionIndex >= quizQuestions.length) {
                 // All games completed
                 gameScreens.forEach(screen => {
                     screen.classList.remove('active');
@@ -825,7 +690,6 @@
         
         function resetAllGames() {
             resetMatchingGame();
-            resetWordSearch();
             resetQuiz();
             
             totalScore = 0;
@@ -937,248 +801,6 @@
             cards.forEach(card => {
                 card.classList.remove('flipped', 'matched');
             });
-        }
-        
-        // Word Search Functions - NEW IMPLEMENTATION
-        function generateWordSearch() {
-            const gridSize = 8;
-            wordSearchGrid = [];
-            placedWords = [];
-            currentWordSelection = [];
-            foundWords = [];
-            wordScore = 0;
-            
-            if (wordScoreDisplay) {
-                wordScoreDisplay.textContent = wordScore;
-            }
-            
-            // Initialize empty grid
-            for (let i = 0; i < gridSize; i++) {
-                const row = [];
-                for (let j = 0; j < gridSize; j++) {
-                    row.push('');
-                }
-                wordSearchGrid.push(row);
-            }
-            
-            // Define directions: [row change, col change]
-            const directions = [
-                [0, 1],  // Right
-                [1, 0],  // Down
-                [1, 1],  // Diagonal down-right
-                [1, -1]  // Diagonal down-left
-            ];
-            
-            // Shuffle words to randomize placement
-            const shuffledWords = [...wordSearchWords].sort(() => Math.random() - 0.5);
-            
-            // Place words in grid
-            shuffledWords.forEach(word => {
-                let placed = false;
-                let attempts = 0;
-                
-                while (!placed && attempts < 50) {
-                    attempts++;
-                    
-                    // Choose random direction
-                    const direction = directions[Math.floor(Math.random() * directions.length)];
-                    
-                    // Choose random starting position
-                    let row = Math.floor(Math.random() * gridSize);
-                    let col = Math.floor(Math.random() * gridSize);
-                    
-                    // Adjust start position to fit word based on direction
-                    if (direction[0] !== 0) {
-                        row = Math.min(row, gridSize - word.length);
-                    }
-                    if (direction[0] === 1 && direction[1] === -1) {
-                        col = Math.max(word.length - 1, col);
-                    }
-                    if (direction[1] !== 0 && direction[1] !== -1) {
-                        col = Math.min(col, gridSize - word.length);
-                    }
-                    
-                    // Check if word can be placed
-                    let canPlace = true;
-                    let positions = [];
-                    
-                    for (let i = 0; i < word.length; i++) {
-                        const newRow = row + i * direction[0];
-                        const newCol = col + i * direction[1];
-                        
-                        // Check boundaries
-                        if (newRow < 0 || newRow >= gridSize || newCol < 0 || newCol >= gridSize) {
-                            canPlace = false;
-                            break;
-                        }
-                        
-                        // Check if cell is empty or matches the letter
-                        if (wordSearchGrid[newRow][newCol] !== '' && 
-                            wordSearchGrid[newRow][newCol] !== word[i]) {
-                            canPlace = false;
-                            break;
-                        }
-                        
-                        positions.push([newRow, newCol]);
-                    }
-                    
-                    // Place word if possible
-                    if (canPlace) {
-                        for (let i = 0; i < word.length; i++) {
-                            const [r, c] = positions[i];
-                            wordSearchGrid[r][c] = word[i];
-                        }
-                        
-                        placedWords.push({
-                            word,
-                            positions
-                        });
-                        
-                        placed = true;
-                    }
-                }
-                
-                if (!placed) {
-                    console.warn(`Could not place word: ${word}`);
-                }
-            });
-            
-            // Fill empty cells with random Hindi letters
-            const hindiLetters = "अआइईउऊएऐओऔकखगघचछजझटठडढणतथदधनपफबभमयरलवशषसह";
-            
-            for (let i = 0; i < gridSize; i++) {
-                for (let j = 0; j < gridSize; j++) {
-                    if (wordSearchGrid[i][j] === '') {
-                        wordSearchGrid[i][j] = hindiLetters[Math.floor(Math.random() * hindiLetters.length)];
-                    }
-                }
-            }
-            
-            // Update UI
-            renderWordSearch();
-        }
-        
-        function renderWordSearch() {
-            const gridContainer = document.getElementById('word-search-grid');
-            const wordListContainer = document.getElementById('word-list');
-            
-            if (!gridContainer || !wordListContainer) {
-                console.error("Word search containers not found");
-                return;
-            }
-            
-            // Clear containers
-            gridContainer.innerHTML = '';
-            wordListContainer.innerHTML = '';
-            
-            // Render grid
-            for (let i = 0; i < wordSearchGrid.length; i++) {
-                for (let j = 0; j < wordSearchGrid[i].length; j++) {
-                    const letter = document.createElement('div');
-                    letter.className = 'letter';
-                    letter.textContent = wordSearchGrid[i][j];
-                    letter.dataset.row = i;
-                    letter.dataset.col = j;
-                    letter.addEventListener('click', handleLetterClick);
-                    gridContainer.appendChild(letter);
-                }
-            }
-            
-            // Render word list
-            wordSearchWords.forEach(word => {
-                const wordElement = document.createElement('div');
-                wordElement.className = foundWords.includes(word) ? 'word-item word-found' : 'word-item';
-                wordElement.textContent = word;
-                wordElement.dataset.word = word;
-                wordListContainer.appendChild(wordElement);
-            });
-        }
-        
-        function handleLetterClick() {
-            // Toggle selection state
-            this.classList.toggle('selected');
-            
-            // Get cell coordinates
-            const row = parseInt(this.dataset.row);
-            const col = parseInt(this.dataset.col);
-            
-            // If selected, add to selection
-            if (this.classList.contains('selected')) {
-                currentWordSelection.push({
-                    element: this,
-                    row: row,
-                    col: col,
-                    letter: wordSearchGrid[row][col]
-                });
-            } else {
-                // If deselected, remove from selection
-                currentWordSelection = currentWordSelection.filter(
-                    cell => cell.element !== this
-                );
-            }
-            
-            // Check if selected letters form a word
-            checkSelectedWord();
-        }
-        
-        function checkSelectedWord() {
-            if (currentWordSelection.length === 0) return;
-            
-            // Get the word from selected letters
-            const selectedWord = currentWordSelection.map(cell => cell.letter).join('');
-            
-            // Check if it's in our word list and not already found
-            if (wordSearchWords.includes(selectedWord) && !foundWords.includes(selectedWord)) {
-                // Word found!
-                foundWords.push(selectedWord);
-                
-                // Update UI
-                const wordItems = document.querySelectorAll('.word-item');
-                wordItems.forEach(item => {
-                    if (item.dataset.word === selectedWord) {
-                        item.classList.add('word-found');
-                    }
-                });
-                
-                // Add celebration effect
-                currentWordSelection.forEach(cell => {
-                    cell.element.classList.add('celebrate');
-                    setTimeout(() => {
-                        cell.element.classList.remove('celebrate');
-                    }, 500);
-                });
-                
-                // Award points - longer words worth more
-                wordScore += selectedWord.length * 2;
-                wordScoreDisplay.textContent = wordScore;
-                
-                // Check if all words found
-                if (foundWords.length === wordSearchWords.length) {
-                    // Bonus for finding all words
-                    wordScore += 30;
-                    wordScoreDisplay.textContent = wordScore;
-                    setTimeout(checkGameCompletion, 1000);
-                }
-            }
-            
-            // Clear selection
-            currentWordSelection.forEach(cell => {
-                cell.element.classList.remove('selected');
-            });
-            currentWordSelection = [];
-        }
-        
-        function resetWordSearch() {
-            currentWordSelection = [];
-            foundWords = [];
-            wordScore = 0;
-            
-            if (wordScoreDisplay) {
-                wordScoreDisplay.textContent = wordScore;
-            }
-            
-            // Generate new word search
-            generateWordSearch();
         }
         
         // Quiz Game Functions
