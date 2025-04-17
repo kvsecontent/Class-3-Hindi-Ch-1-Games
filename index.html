@@ -49,6 +49,11 @@
             display: block;
         }
         
+        /* Add this rule to ensure .active takes precedence */
+        .game-screen.active {
+            display: block !important;
+        }
+        
         h1, h2, h3 {
             color: #2e7d32;
             margin-bottom: 15px;
@@ -673,6 +678,11 @@
         
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
+            // Make sure game screens are properly hidden at startup
+            gameScreens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
             // Start Game
             startButton.addEventListener('click', startGame);
             
@@ -728,12 +738,27 @@
             gameMenu.classList.add('active');
         }
         
+        // Updated selectGame function
         function selectGame(event) {
             const selectedGame = event.currentTarget.dataset.game;
             currentGame = selectedGame;
             
+            // Hide all game screens first
+            gameScreens.forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Hide the menu
             gameMenu.classList.remove('active');
-            document.querySelector(`.${selectedGame}-game`).classList.add('active');
+            
+            // Show the selected game screen
+            const targetGame = document.querySelector(`.${selectedGame}-game`);
+            if (targetGame) {
+                targetGame.classList.add('active');
+            } else {
+                console.error(`Game screen for ${selectedGame} not found`);
+                return;
+            }
             
             // Reset the current game
             if (selectedGame === 'matching') {
@@ -793,6 +818,11 @@
         // Matching Game Functions
         function initializeMatchingGame() {
             const gameBoard = document.querySelector('.matching-game .game-board');
+            if (!gameBoard) {
+                console.error("Matching game board not found");
+                return;
+            }
+            
             gameBoard.innerHTML = '';
             
             // Create shuffled array of cards
@@ -893,6 +923,11 @@
         function initializeWordSearch() {
             const grid = document.querySelector('.word-game .word-grid');
             const wordList = document.querySelector('.word-game .word-list');
+            
+            if (!grid || !wordList) {
+                console.error("Word search grid or list not found");
+                return;
+            }
             
             // Clear previous grids
             grid.innerHTML = '';
@@ -1044,6 +1079,11 @@
             const questionContainer = document.getElementById('current-question');
             const optionsContainer = document.getElementById('options-container');
             const progressBar = document.getElementById('quiz-progress');
+            
+            if (!questionContainer || !optionsContainer || !progressBar) {
+                console.error("Quiz elements not found");
+                return;
+            }
             
             // If no more questions, end the game
             if (currentQuestionIndex >= quizQuestions.length) {
