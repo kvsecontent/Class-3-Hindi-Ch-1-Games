@@ -728,37 +728,23 @@
             gameMenu.classList.add('active');
         }
         
-       function selectGame(event) {
-    const selectedGame = event.currentTarget.dataset.game;
-    currentGame = selectedGame;
-    
-    // Hide all game screens first
-    gameScreens.forEach(screen => {
-        screen.classList.remove('active');
-    });
-    
-    // Hide the menu
-    gameMenu.classList.remove('active');
-    
-    // Show the selected game screen
-    const targetGame = document.querySelector(`.${selectedGame}-game`);
-    if (targetGame) {
-        targetGame.classList.add('active');
-    } else {
-        console.error(`Game screen for ${selectedGame} not found`);
-        return;
-    }
-    
-    // Reset the current game
-    if (selectedGame === 'matching') {
-        resetMatchingGame();
-    } else if (selectedGame === 'word') {
-        resetWordSearch();
-    } else if (selectedGame === 'quiz') {
-        resetQuiz();
-    }
-}
- 
+        function selectGame(event) {
+            const selectedGame = event.currentTarget.dataset.game;
+            currentGame = selectedGame;
+            
+            gameMenu.classList.remove('active');
+            document.querySelector(`.${selectedGame}-game`).classList.add('active');
+            
+            // Reset the current game
+            if (selectedGame === 'matching') {
+                resetMatchingGame();
+            } else if (selectedGame === 'word') {
+                resetWordSearch();
+            } else if (selectedGame === 'quiz') {
+                resetQuiz();
+            }
+        }
+        
         function goBackToMenu() {
             // Hide all game screens
             gameScreens.forEach(screen => {
@@ -905,131 +891,26 @@
         
         // Word Search Functions
         function initializeWordSearch() {
-    const grid = document.querySelector('.word-game .word-grid');
-    const wordList = document.querySelector('.word-game .word-list');
-    
-    // Check if grid and wordList elements exist
-    if (!grid || !wordList) {
-        console.error('Word search grid or list not found');
-        return;
-    }
-    
-    // Clear previous grids
-    grid.innerHTML = '';
-    wordList.innerHTML = '';
-    
-    // Generate random letters for grid
-    const gridSize = { rows: 8, cols: 8 };
-    const gridLetters = [];
-    
-    // Fill with random letters first
-    for (let i = 0; i < gridSize.rows; i++) {
-        const row = [];
-        for (let j = 0; j < gridSize.cols; j++) {
-            row.push(getRandomHindiLetter());
-        }
-        gridLetters.push(row);
-    }
-    
-    // Place words in the grid
-    const directions = [
-        [0, 1],  // Right
-        [1, 0],  // Down
-        [1, 1]   // Diagonal
-    ];
-    
-    wordSearchWords.forEach(word => {
-        let placed = false;
-        let attempts = 0;
-        
-        while (!placed && attempts < 50) {
-            attempts++;
+            const grid = document.querySelector('.word-game .word-grid');
+            const wordList = document.querySelector('.word-game .word-list');
             
-            // Choose random direction
-            const dirIndex = Math.floor(Math.random() * directions.length);
-            const dir = directions[dirIndex];
+            // Clear previous grids
+            grid.innerHTML = '';
+            wordList.innerHTML = '';
             
-            // Choose random starting position
-            const startRow = Math.floor(Math.random() * (gridSize.rows - word.length * dir[0]));
-            const startCol = Math.floor(Math.random() * (gridSize.cols - word.length * dir[1]));
+            // Generate random letters for grid
+            const gridSize = { rows: 8, cols: 8 };
+            const gridLetters = [];
             
-            // Check if we can place the word
-            let canPlace = true;
-            for (let i = 0; i < word.length; i++) {
-                const row = startRow + i * dir[0];
-                const col = startCol + i * dir[1];
-                
-                if (gridLetters[row][col] !== word[i] && gridLetters[row][col] !== getRandomHindiLetter()) {
-                    canPlace = false;
-                    break;
+            // Fill with random letters first
+            for (let i = 0; i < gridSize.rows; i++) {
+                const row = [];
+                for (let j = 0; j < gridSize.cols; j++) {
+                    row.push(getRandomHindiLetter());
                 }
+                gridLetters.push(row);
             }
             
-            // Place the word
-            if (canPlace) {
-                for (let i = 0; i < word.length; i++) {
-                    const row = startRow + i * dir[0];
-                    const col = startCol + i * dir[1];
-                    gridLetters[row][col] = word[i];
-                }
-                placed = true;
-            }
-        }
-    });
-    
-    // Create the grid in the UI
-    for (let i = 0; i < gridSize.rows; i++) {
-        for (let j = 0; j < gridSize.cols; j++) {
-            const letter = document.createElement('div');
-            letter.className = 'letter';
-            letter.textContent = gridLetters[i][j];
-            letter.dataset.row = i;
-            letter.dataset.col = j;
-            letter.addEventListener('click', selectLetter);
-            grid.appendChild(letter);
-        }
-    }
-    
-    // Create the word list
-    wordSearchWords.forEach(word => {
-        const wordItem = document.createElement('div');
-        wordItem.className = 'word-item';
-        wordItem.textContent = word;
-        wordItem.dataset.word = word;
-        wordList.appendChild(wordItem);
-    });
-}
-
-// Fix the initialization code
-document.addEventListener('DOMContentLoaded', () => {
-    // Define game screens globally
-    window.gameScreens = document.querySelectorAll('.game-screen');
-    
-    // Start Game
-    startButton.addEventListener('click', startGame);
-    
-    // Game Selection
-    gameOptions.forEach(option => {
-        option.addEventListener('click', selectGame);
-    });
-    
-    // Back to Menu
-    backButtons.forEach(button => {
-        button.addEventListener('click', goBackToMenu);
-    });
-    
-    // Play Again
-    playAgainButton.addEventListener('click', resetAllGames);
-    
-    // Hint Buttons
-    hintButtons.forEach(button => {
-        button.addEventListener('click', showHint);
-    });
-    
-    // Initialize the games only when they are selected, not all at once
-    // We'll move the initialization to the selectGame function
-});
-    
             // Place words in the grid
             const directions = [
                 [0, 1],  // Right
